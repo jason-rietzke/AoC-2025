@@ -1,10 +1,2 @@
 [workspace]
 members = ["day01", "day02", "day03", "day04", "day05", "day06"]
-
-
-[package]
-name = "AoC-2025"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
