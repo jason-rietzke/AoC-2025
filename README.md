@@ -15,61 +15,70 @@ All solutions are implemented in Rust and compiled with `--release` optimization
 ### Day 1
 
 ```
-Part 1: 1168 (in 610.423µs)
-Part 2: 7199 (in 1.095119ms)
+Part 1: 1168 (in 608.342µs)
+Part 2: 7199 (in 1.067383ms)
 ```
 
-*Total time: 3.709 ms*
+*Total time: 3.757 ms*
 
 ### Day 2
 
 ```
-Part 1: 30599400849 (in 33.579156ms)
-Part 2: 46270373595 (in 66.308095ms)
+Part 1: 30599400849 (in 33.23266ms)
+Part 2: 46270373595 (in 66.293378ms)
 ```
 
-*Total time: 103.034 ms*
+*Total time: 103.469 ms*
 
 ### Day 3
 
 ```
-Part 1: 17158 (in 413.371µs)
-Part 2: 170449335646486 (in 544.669µs)
+Part 1: 17158 (in 391.905µs)
+Part 2: 170449335646486 (in 545.885µs)
 ```
 
-*Total time: 3.230 ms*
+*Total time: 3.489 ms*
 
 ### Day 4
 
 ```
-Part 1: 1489 (in 298.474µs)
-Part 2: 8890 (in 2.057267ms)
+Part 1: 1489 (in 199.364µs)
+Part 2: 8890 (in 1.355333ms)
 ```
 
-*Total time: 4.279 ms*
+*Total time: 3.642 ms*
 
 ### Day 5
 
 ```
-Part 1: 775 (in 189.298µs)
-Part 2: 350684792662845 (in 58.22µs)
+Part 1: 775 (in 194.344µs)
+Part 2: 350684792662845 (in 58.66µs)
 ```
 
-*Total time: 2.075 ms*
+*Total time: 2.019 ms*
 
 ### Day 6
 
 ```
-Part 1: 4722948564882 (in 208.243µs)
-Part 2: 9581313737063 (in 534.309µs)
+Part 1: 4722948564882 (in 208.571µs)
+Part 2: 9581313737063 (in 414.788µs)
 ```
 
-*Total time: 2.537 ms*
+*Total time: 2.608 ms*
+
+### Day 7
+
+```
+Part 1: 1690 (in 230.122µs)
+Part 2: 221371496188107 (in 168.597µs)
+```
+
+*Total time: 2.152 ms*
 
 
 ---
 
-**Total Runtime:** 159.110 ms
+**Total Runtime:** 167.869 ms
 
 ## 🛠️ Building and Running
 
@@ -97,4 +106,4 @@ Each day's solution is organized in its own workspace member with:
 
 ---
 
-*Last updated: 2025-12-06 13:32:34*
+*Last updated: 2025-12-07 08:06:58*
