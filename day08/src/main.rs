@@ -2,66 +2,31 @@ fn main() {
     let input = std::fs::read_to_string(format!("{}/data.txt", env!("CARGO_MANIFEST_DIR")))
         .expect("Failed to read input file");
     let performace_start = std::time::Instant::now();
-    let part1_result = solve_part1(&input, 1000);
+    let (part1_result, part1_timing) = solve_part1(&input, 1000);
     let performance_duration = performace_start.elapsed();
-    println!("Part 1: {} (in {:?})", part1_result, performance_duration);
+    println!("Part 1: {} (in {:?}){}", part1_result, performance_duration, part1_timing);
 
     let performace_start = std::time::Instant::now();
-    let part2_result = solve_part2(&input);
+    let (part2_result, part2_timing) = solve_part2(&input);
     let performance_duration = performace_start.elapsed();
-    println!("Part 2: {} (in {:?})", part2_result, performance_duration);
+    println!("Part 2: {} (in {:?}){}", part2_result, performance_duration, part2_timing);
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Circuit {
+    nodes: Vec<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Node {
     index: usize,
     position: (usize, usize, usize),
-    possible_links: Vec<Link>,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Link {
     from: usize,
     to: usize,
     distance: u64,
-}
-
-/// find all distinct circuits in the graph (single nodes can be considered circuits of length 1)
-fn find_circuits(nodes: &Vec<Node>, links: &Vec<Link>) -> Vec<Vec<usize>> {
-    let mut visited = vec![false; nodes.len()];
-    let mut circuits: Vec<Vec<usize>> = vec![];
-
-    for node in nodes {
-        if !visited[node.index] {
-            let mut circuit: Vec<usize> = vec![];
-            let mut stack: Vec<usize> = vec![node.index];
-            while let Some(current_index) = stack.pop() {
-                if !visited[current_index] {
-                    visited[current_index] = true;
-                    circuit.push(current_index);
-                    let neighbors: Vec<usize> = links
-                        .iter()
-                        .filter_map(|link| {
-                            if link.from == current_index {
-                                Some(link.to)
-                            } else if link.to == current_index {
-                                Some(link.from)
-                            } else {
-                                None
-                            }
-                        })
-                        .collect();
-                    for neighbor in neighbors {
-                        if !visited[neighbor] {
-                            stack.push(neighbor);
-                        }
-                    }
-                }
-            }
-            circuits.push(circuit);
-        }
-    }
-
-    circuits
 }
 
 impl Node {
@@ -73,7 +38,6 @@ impl Node {
         Node {
             index,
             position: (coords[0], coords[1], coords[2]),
-            possible_links: vec![],
         }
     }
 
@@ -84,93 +48,165 @@ impl Node {
         let dz = (self.position.2 as isize - other.position.2 as isize).abs() as u64;
         dx * dx + dy * dy + dz * dz
     }
+}
 
-    fn evaluate_possible_links(&mut self, all_nodes: &Vec<Node>) {
-        for node in all_nodes {
-            if node.index != self.index {
-                let distance = self.square_distance(node);
-                self.possible_links.push(Link {
-                    from: self.index,
-                    to: node.index,
-                    distance,
-                });
+fn calculate_links(nodes: &Vec<Node>, only_best: Option<usize>) -> Vec<Link> {
+    let mut links = match only_best {
+        Some(n) => Vec::with_capacity(n),
+        None => Vec::with_capacity(nodes.len() * (nodes.len() - 1) / 2),
+    };
+    // (distance, link_index) sorted by distance
+    let mut link_distances: Vec<(u64, usize)> = Vec::with_capacity(links.capacity());
+
+    for node in nodes {
+        for other_node in nodes {
+            // avoid duplicate links and self-links
+            if node.index < other_node.index {
+                let distance = node.square_distance(other_node);
+                match only_best {
+                    Some(n) => {
+                        if links.len() < n {
+                            links.push(Link {
+                                from: node.index,
+                                to: other_node.index,
+                                distance,
+                            });
+                            link_distances.push((distance, links.len() - 1));
+                            link_distances.sort_by_key(|(dist, _)| *dist);
+                        } else {
+                            if distance < link_distances[n - 1].0 {
+                                let (_, link_index) = link_distances.pop().unwrap();
+                                links[link_index] = Link {
+                                    from: node.index,
+                                    to: other_node.index,
+                                    distance,
+                                };
+                                link_distances.push((distance, link_index));
+                                link_distances.sort_by_key(|(dist, _)| *dist);
+                            }
+                        }
+                    }
+                    None => {
+                        links.push(Link {
+                            from: node.index,
+                            to: other_node.index,
+                            distance,
+                        });
+                    }
+                }
             }
         }
     }
+    links.sort_by_key(|link| link.distance);
+    links
 }
 
-fn solve_part1(input: &str, shortest_connections_to_find: usize) -> u64 {
-    let mut nodes: Vec<Node> = input
+/// calculating all distinct circuits with the given links
+/// early returning if all nodes are in a single circuit
+/// every node starts in its own circuit
+fn calculate_circuits(nodes: &Vec<Node>, links: &Vec<Link>) -> (Vec<Circuit>, Vec<usize>) {
+    let mut circuits: Vec<Circuit> = nodes
+        .iter()
+        .map(|node| Circuit {
+            nodes: vec![node.index],
+        })
+        .collect();
+    let mut links_in_use: Vec<usize> = vec![];
+
+    for (link_index, link) in links.iter().enumerate() {
+        // find the circuits that the link's nodes are in
+        let mut circuit_indices: Vec<usize> = vec![];
+        for (circuit_index, circuit) in circuits.iter().enumerate() {
+            if circuit.nodes.contains(&link.from) || circuit.nodes.contains(&link.to) {
+                circuit_indices.push(circuit_index);
+            }
+        }
+        // if the link connects two different circuits, merge them
+        if circuit_indices.len() == 2 {
+            let first_circuit_index = circuit_indices[0];
+            let second_circuit_index = circuit_indices[1];
+            let mut first_circuit = circuits[first_circuit_index].clone();
+            let second_circuit = circuits[second_circuit_index].clone();
+            first_circuit
+                .nodes
+                .extend(second_circuit.nodes.iter().cloned());
+            // remove the second circuit
+            circuits.remove(second_circuit_index);
+            // update the first circuit
+            circuits[first_circuit_index] = first_circuit;
+            links_in_use.push(link_index);
+        }
+        // early return if all nodes are in a single circuit
+        if circuits.len() == 1 {
+            break;
+        }
+    }
+
+    (circuits, links_in_use)
+}
+
+fn solve_part1(input: &str, shortest_connections_to_find: usize) -> (u64, String) {
+    let timer = std::time::Instant::now();
+    let nodes: Vec<Node> = input
         .lines()
         .enumerate()
         .map(|(index, line)| Node::from_str(index, line))
         .collect();
+    let parse_time = std::time::Instant::now();
 
-    for i in 0..nodes.len() {
-        let mut node = nodes[i].clone();
-        node.evaluate_possible_links(&nodes);
-        nodes[i] = node;
-    }
+    let links = calculate_links(&nodes, Some(shortest_connections_to_find));
+    let calc_time = std::time::Instant::now();
 
-    let mut possible_links: Vec<Link> = nodes
-        .iter()
-        .flat_map(|node| node.possible_links.clone())
-        .filter(|link| link.from < link.to)
-        .collect();
-    possible_links.sort_by_key(|link| link.distance);
+    let (circuits, _) = calculate_circuits(&nodes, &links);
+    let circuit_time = std::time::Instant::now();
 
-    let links = possible_links
-        .iter()
-        .take(shortest_connections_to_find)
-        .cloned()
-        .collect();
-
-    let circuits = find_circuits(&nodes, &links);
-    let mut circuit_sizes: Vec<usize> = circuits.iter().map(|circuit| circuit.len()).collect();
+    let mut circuit_sizes: Vec<usize> =
+        circuits.iter().map(|circuit| circuit.nodes.len()).collect();
     circuit_sizes.sort_by(|a, b| b.cmp(a));
 
     let largest_circuit_sizes = circuit_sizes.iter().take(3);
-    largest_circuit_sizes.fold(1, |acc, size| acc * (*size as u64))
+    let result = largest_circuit_sizes.fold(1, |acc, size| acc * (*size as u64));
+    let evaluation_time = std::time::Instant::now();
+
+    let timing_info = format!(
+        "\n\tParsing: {:?}\n\tCalculating links: {:?}\n\tCalculating circuits: {:?}\n\tEvaluating result: {:?}",
+        parse_time.duration_since(timer),
+        calc_time.duration_since(parse_time),
+        circuit_time.duration_since(calc_time),
+        evaluation_time.duration_since(circuit_time),
+    );
+
+    (result, timing_info)
 }
 
-fn solve_part2(input: &str) -> u64 {
-    let mut nodes: Vec<Node> = input
+fn solve_part2(input: &str) -> (u64, String) {
+    let timer = std::time::Instant::now();
+    let nodes: Vec<Node> = input
         .lines()
         .enumerate()
         .map(|(index, line)| Node::from_str(index, line))
         .collect();
+    let parse_time = std::time::Instant::now();
 
-    for i in 0..nodes.len() {
-        let mut node = nodes[i].clone();
-        node.evaluate_possible_links(&nodes);
-        nodes[i] = node;
-    }
+    let links = calculate_links(&nodes, None);
+    let calc_time = std::time::Instant::now();
 
-    let mut possible_links: Vec<Link> = nodes
-        .iter()
-        .flat_map(|node| node.possible_links.clone())
-        .filter(|link| link.from < link.to)
-        .collect();
-    possible_links.sort_by_key(|link| link.distance);
-    let possible_links = possible_links;
+    let (_, links_in_use) = calculate_circuits(&nodes, &links);
+    let circuit_time = std::time::Instant::now();
 
-    // binary search through all options until the lowest option that results in a single circuit is found
-    let mut low = 1;
-    let mut high = possible_links.len();
-    while low < high {
-        let mid = (low + high) / 2;
-        let links: Vec<Link> = possible_links.iter().take(mid).cloned().collect();
-        let circuits = find_circuits(&nodes, &links);
-        if circuits.len() == 1 {
-            high = mid;
-        } else {
-            low = mid + 1;
-        }
-    }
-    let links: Vec<Link> = possible_links.iter().take(low).cloned().collect();
+    let last_link = &links[links_in_use[links_in_use.len() - 1]];
+    let result = nodes[last_link.from].position.0 as u64 * nodes[last_link.to].position.0 as u64;
+    let evaluation_time = std::time::Instant::now();
 
-    let last_link = links.last().unwrap();
-    nodes[last_link.from].position.0 as u64 * nodes[last_link.to].position.0 as u64
+    let timing_info = format!(
+        "\n\tParsing: {:?}\n\tCalculating links: {:?}\n\tCalculating circuits: {:?}\n\tEvaluating result: {:?}",
+        parse_time.duration_since(timer),
+        calc_time.duration_since(parse_time),
+        circuit_time.duration_since(calc_time),
+        evaluation_time.duration_since(circuit_time),
+    );
+
+    (result, timing_info)
 }
 
 #[cfg(test)]
@@ -204,13 +240,13 @@ mod tests {
     fn test_part1() {
         let input = test_data();
         let expected_output = 40;
-        assert_eq!(solve_part1(input, 10), expected_output);
+        assert_eq!(solve_part1(input, 10).0, expected_output);
     }
 
     #[test]
     fn test_part2() {
         let input = test_data();
         let expected_output = 25272;
-        assert_eq!(solve_part2(input), expected_output);
+        assert_eq!(solve_part2(input).0, expected_output);
     }
 }
