@@ -4,8 +4,8 @@ Welcome to my Advent of Code 2025 solutions! This repository contains my attempt
 
 ## 📊 System Specifications
 
-- **CPU:** AMD Ryzen AI 9 HX 370 w/ Radeon 890M
-- **Cores:** 24
+- **CPU:** AMD Ryzen 9 7950X3D 16-Core Processor
+- **Cores:** 32
 - **OS:** Arch Linux
 
 ## 🏃 Performance Results
@@ -15,96 +15,105 @@ All solutions are implemented in Rust and compiled with `--release` optimization
 ### Day 1
 
 ```
-Part 1: 1168 (in 624.518µs)
-Part 2: 7199 (in 1.077075ms)
+Part 1: 1168 (in 446.699µs)
+Part 2: 7199 (in 526.381µs)
 ```
 
-*Total time: 4.140 ms*
+*Total time: 2.695 ms*
 
 ### Day 2
 
 ```
-Part 1: 30599400849 (in 37.413528ms)
-Part 2: 46270373595 (in 66.672895ms)
+Part 1: 30599400849 (in 34.395777ms)
+Part 2: 46270373595 (in 72.363696ms)
 ```
 
-*Total time: 107.177 ms*
+*Total time: 108.585 ms*
 
 ### Day 3
 
 ```
-Part 1: 17158 (in 398.966µs)
-Part 2: 170449335646486 (in 541.383µs)
+Part 1: 17158 (in 227.372µs)
+Part 2: 170449335646486 (in 327.473µs)
 ```
 
-*Total time: 3.007 ms*
+*Total time: 2.354 ms*
 
 ### Day 4
 
 ```
-Part 1: 1489 (in 306.434µs)
-Part 2: 8890 (in 2.076934ms)
+Part 1: 1489 (in 154.244µs)
+Part 2: 8890 (in 1.001534ms)
 ```
 
-*Total time: 4.621 ms*
+*Total time: 2.981 ms*
 
 ### Day 5
 
 ```
-Part 1: 775 (in 188.803µs)
-Part 2: 350684792662845 (in 58.71µs)
+Part 1: 775 (in 103.657µs)
+Part 2: 350684792662845 (in 33.343µs)
 ```
 
-*Total time: 2.254 ms*
+*Total time: 1.991 ms*
 
 ### Day 6
 
 ```
-Part 1: 4722948564882 (in 214.852µs)
-Part 2: 9581313737063 (in 534.349µs)
+Part 1: 4722948564882 (in 113.145µs)
+Part 2: 9581313737063 (in 356.478µs)
 ```
 
-*Total time: 2.676 ms*
+*Total time: 2.092 ms*
 
 ### Day 7
 
 ```
-Part 1: 1690 (in 225.041µs)
-Part 2: 221371496188107 (in 163.256µs)
+Part 1: 1690 (in 178.419µs)
+Part 2: 221371496188107 (in 123.896µs)
 ```
 
-*Total time: 2.799 ms*
+*Total time: 1.702 ms*
 
 ### Day 8
 
 ```
-Part 1: 163548 (in 14.488429ms)
-	Parsing: 118.041µs
-	Calculating links: 13.043025ms
-	Calculating circuits: 1.310742ms
-	Evaluating result: 7.564µs
-Part 2: 772452514 (in 21.92004ms)
-	Parsing: 75.361µs
-	Calculating links: 19.453025ms
-	Calculating circuits: 2.272591ms
-	Evaluating result: 30ns
+Part 1: 163548 (in 10.647561ms)
+	Parsing: 67.178µs
+	Calculating links: 9.332281ms
+	Calculating circuits: 1.237612ms
+	Evaluating result: 4.709µs
+Part 2: 772452514 (in 18.376755ms)
+	Parsing: 77.568µs
+	Calculating links: 16.166653ms
+	Calculating circuits: 2.046751ms
+	Evaluating result: 91ns
 ```
 
-*Total time: 39.503 ms*
+*Total time: 30.682 ms*
 
 ### Day 9
 
 ```
-Part 1: 4782896435 (in 502.48µs)
-Part 2: 1540060480 (in 29.536856ms)
+Part 1: 4782896435 (in 273.34µs)
+Part 2: 1540060480 (in 22.029259ms)
 ```
 
-*Total time: 32.979 ms*
+*Total time: 24.177 ms*
+
+### Day 10
+
+```
+Part 1: 469 (in 3.436452ms)
+Part 2: 19293 (in 127.250668ms)
+```
+
+*Total time: 135.970 ms*
 
 
 ---
 
-**Total Runtime:** 265.888 ms
+**Total Runtime:** 372.183 ms
 
 ## 🛠️ Building and Running
 
@@ -132,4 +141,4 @@ Each day's solution is organized in its own workspace member with:
 
 ---
 
-*Last updated: 2025-12-10 02:39:03*
+*Last updated: 2025-12-11 00:39:46*
